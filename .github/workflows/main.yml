@@ -6,14 +6,15 @@ on:
 
 jobs:
   infrastructure-setup:
-    defaults:
-      run:
-        working-directory: infrastructure
+  #  defaults:
+  #    run:
+  #      working-directory: infrastructure
     name: Format, validate and plan infrastructure
     runs-on: ubuntu-latest
     steps:
     - uses: opentofu/setup-opentofu@v1
-    
+    - run: pwd
+    - run: ls
     - name: OpenTofu fmt
       id: fmt
       run: tofu fmt -check
