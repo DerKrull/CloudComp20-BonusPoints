@@ -21,5 +21,8 @@ jobs:
         
     - uses: opentofu/setup-opentofu@v1
 
+    - name: Tofu init
+      run: tofu init 
+
     - name: Tofu destroy
       run: tofu apply -destroy -auto-approve
