@@ -40,25 +40,3 @@ jobs:
     - name: OpenTofu Plan
       id: plan
       run: tofu plan -no-color
-
-  infrastructure-destroy:
-    defaults:
-      run:
-        working-directory: infrastructure
-    name: Tofu destroy
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: "Configure AWS Credentials"
-      uses: aws-actions/configure-aws-credentials@v4.2.1
-      with:
-        aws-region: us-east-1
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        
-    - uses: opentofu/setup-opentofu@v1
-
-    - name: Tofu destroy
-      run: tofu apply -destroy -auto-approve
