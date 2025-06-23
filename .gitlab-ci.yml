@@ -3,5 +3,6 @@ include:
   - component: $CI_SERVER_FQDN/components/opentofu/full-pipeline@0.10.0
     inputs:
       opentofu_version: 1.6.1
+      auto_define_backend: true
 
 stages: [validate, test, build, deploy, cleanup]
