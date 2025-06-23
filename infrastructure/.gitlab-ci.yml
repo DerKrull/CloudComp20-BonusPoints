@@ -1,0 +1,7 @@
+# Using version `0.10.0`:
+include:
+  - component: $CI_SERVER_FQDN/components/opentofu/full-pipeline@0.10.0
+    inputs:
+      opentofu_version: 1.6.1
+
+stages: [validate, test, build, deploy, cleanup]
