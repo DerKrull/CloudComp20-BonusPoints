@@ -2,16 +2,16 @@ resource "aws_lb" "lb" {
   name               = "external-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.sg_for_elb.id]
-  subnets            = [aws_subnet.public_subnet_1a.id, aws_subnet.public_subnet_1b.id]
-  depends_on         = [aws_internet_gateway.internet_gw]
+  security_groups    = [var.sg_for_lb_id]
+  subnets            = var.public_subnet_ids
+  depends_on         = [var.igw]
 }
 
 resource "aws_lb_target_group" "alb_tg" {
   name     = "alb-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
+  vpc_id   = var.vpc_id
 }
 
 resource "aws_lb_listener" "front_end" {

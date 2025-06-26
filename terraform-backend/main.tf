@@ -17,6 +17,6 @@ resource "aws_s3_bucket" "backend_bucket" {
   bucket = "cloudcomp20-terraform-state-bucket"
 
   tags = {
-    Name        = "Terraform state bucket"
+    Name  = "Terraform state bucket"
   }
 }
