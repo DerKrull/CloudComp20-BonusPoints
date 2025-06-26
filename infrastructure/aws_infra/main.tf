@@ -13,14 +13,14 @@ provider "aws" {
 }
 
 module "ec2" {
-    source = "./aws_infra/ec2"
+    source = "./ec2"
     alb_tg_arn = module.loadbalancer.alb_tg_arn
     private_subnet_1a_id = module.vpc.private_subnet_1a_id
     sg_for_ec2_id = module.secruity.sg_for_ec2_id
 }
 
 module "loadbalancer" {
-    source = "./aws_infra/loadbalancer"
+    source = "./loadbalancer"
     vpc_id = module.vpc.vpc_id
     igw = module.vpc.igw
     public_subnet_ids = [module.vpc.public_subnet_1a_id, module.vpc.public_subnet_1b_id]
@@ -28,9 +28,10 @@ module "loadbalancer" {
 }
 
 module "vpc" {
-    source = "./aws_infra/vpc"
+    source = "./vpc"
 }
 
 module "secruity" {
-    source = "./aws_infra/secruity"
+    source = "./secruity"
+    vpc_id = module.vpc.vpc_id
 }

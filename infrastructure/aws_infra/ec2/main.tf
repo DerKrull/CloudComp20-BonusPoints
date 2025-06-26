@@ -29,7 +29,7 @@ resource "aws_launch_template" "rancher-master-templ" {
   name_prefix   = "rancher-master-templ"
   image_id      = data.aws_ami.al2023.id
   instance_type = "t2.micro"
-  user_data     = filebase64("install_rancher_master.sh")
+  user_data     = filebase64("./${path.module}/install_rancher_master.sh")
   key_name = aws_key_pair.ec2_key.key_name
 
   network_interfaces {
@@ -68,7 +68,7 @@ resource "aws_launch_template" "rancher-worker-templ" {
   name_prefix   = "rancher-worker-templ"
   image_id      = data.aws_ami.al2023.id
   instance_type = "t2.micro"
-  user_data     = filebase64("install_rancher_worker.sh")
+  user_data     = filebase64("./${path.module}/install_rancher_worker.sh")
   key_name = aws_key_pair.ec2_key.key_name
 
   network_interfaces {
@@ -84,10 +84,10 @@ resource "aws_launch_template" "rancher-worker-templ" {
   }
 }
 
-resource "aws_autoscaling_group" "rancher_master_asg" {
+resource "aws_autoscaling_group" "rancher_worker_asg" {
   # no of instances
-  desired_capacity = 3
-  max_size         = 3
+  desired_capacity = 4
+  max_size         = 4
   min_size         = 2
 
   # Connect to the target group

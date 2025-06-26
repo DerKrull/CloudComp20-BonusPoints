@@ -1,6 +1,6 @@
 resource "aws_security_group" "sg_for_elb" {
   name   = "sg_for_elb"
-  vpc_id = aws_vpc.main.id
+  vpc_id = var.vpc_id
   
   ingress {
     description      = "Allow http request from anywhere"
@@ -31,7 +31,7 @@ resource "aws_security_group" "sg_for_elb" {
 
 resource "aws_security_group" "sg_for_ec2" {
   name   = "sg_for_ec2"
-  vpc_id = aws_vpc.main.id
+  vpc_id = var.vpc_id
 
   ingress {
     description     = "Allow http request from Load Balancer"
