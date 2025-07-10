@@ -1,26 +1,12 @@
-data "aws_ami" "al2023" {
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["al2023-ami-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["137112412989"] # Amazon official AMI account
-}
-
-data "aws_ami" "ubuntu" {
-  name_regex = "ami-0d1cd67c26f5fca19"
+  owners = ["099720109477"]  # Canonical owner ID for Ubuntu AMIs
 }
 
 resource "aws_key_pair" "ec2_key" {
@@ -63,7 +49,11 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
   min_size         = 1
 
   # Connect to the target group
-  target_group_arns = [var.rancher_tcp_443_tg_arn, var.rancher_tcp_80_tg_arn]
+  target_group_arns = [
+    var.rancher_tcp_443_tg_arn, 
+    var.rancher_tcp_80_tg_arn, 
+    var.rancher_master_tg_arn#
+  ]
 
   vpc_zone_identifier = [ # Creating EC2 instances in private subnet
     var.subnet_id
@@ -75,11 +65,22 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
   }
 }
 
+data "template_file" "install_script" {
+  template = "${file("${path.module}/install_rancher_node.sh")}"
+  vars = {
+    lb_dns_name = var.lb_dns_name
+  }
+}
+
 resource "aws_launch_template" "rancher-node-templ" {
   name_prefix   = "rancher-node-templ"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.medium"
-  user_data     = filebase64("./${path.module}/install_rancher_node.sh")
+  user_data     = templatefile(
+    data.template_file.install_script,
+    {
+      lb_dns_name = var.lb_dns_name
+    })
   key_name = aws_key_pair.ec2_key.key_name
   
   iam_instance_profile {

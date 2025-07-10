@@ -22,6 +22,8 @@ module "ec2" {
     source = "./ec2"
     rancher_tcp_443_tg_arn = module.loadbalancer.rancher_tcp_443_tg_arn
     rancher_tcp_80_tg_arn = module.loadbalancer.rancher_tcp_80_tg_arn
+    rancher_master_tg_arn = module.loadbalancer.rancher_master_tg_arn
+    lb_dns_name = module.loadbalancer.lb_internal_dns
     subnet_id = module.vpc.public_subnet_1a_id
     sg_for_ec2_id = module.secruity.sg_for_ec2_id
 }

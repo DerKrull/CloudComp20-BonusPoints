@@ -2,7 +2,7 @@
 
 cat <<EOF > /etc/rancher/rke2/config.yaml
 token: my-secret-token
-server: https://<DNS-DOMAIN>:9345
+server: https://${lb_dns_name}:9345
 tls-san:
     - my-rancher-server.example.com
 EOF
