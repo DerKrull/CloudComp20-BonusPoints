@@ -12,10 +12,17 @@ provider "aws" {
   region = "us-east-1"
 }
 
+
+# module "aws-rke2" {
+#   source  = "rancher/rke2/aws"
+#   version = "1.2.6"
+# }
+
 module "ec2" {
     source = "./ec2"
-    alb_tg_arn = module.loadbalancer.alb_tg_arn
-    private_subnet_1a_id = module.vpc.private_subnet_1a_id
+    rancher_tcp_443_tg_arn = module.loadbalancer.rancher_tcp_443_tg_arn
+    rancher_tcp_80_tg_arn = module.loadbalancer.rancher_tcp_80_tg_arn
+    subnet_id = module.vpc.public_subnet_1a_id
     sg_for_ec2_id = module.secruity.sg_for_ec2_id
 }
 

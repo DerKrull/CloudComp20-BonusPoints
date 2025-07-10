@@ -1,13 +1,8 @@
 #!/bin/bash
 
-curl https://releases.rancher.com/install-docker/18.09.sh | sh
-
-sudo usermod -aG docker ubuntu
-
-mkdir -p /etc/rancher/rke2/
-
 cat <<EOF > /etc/rancher/rke2/config.yaml
 token: my-secret-token
+server: https://<DNS-DOMAIN>:9345
 tls-san:
     - my-rancher-server.example.com
 EOF
