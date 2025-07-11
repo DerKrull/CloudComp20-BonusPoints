@@ -1,10 +1,13 @@
 #!/bin/bash
+mkdir -p /etc/rancher/rke2/
+
+touch /etc/rancher/rke2/config.yaml
 
 cat <<EOF > /etc/rancher/rke2/config.yaml
 token: my-secret-token
-server: https://${lb_dns_name}:9345
+server: https://${ip_address}:9345
 tls-san:
-    - my-rancher-server.example.com
+    - ${ip_address}
 EOF
 
 curl -sfL https://get.rke2.io | sh -

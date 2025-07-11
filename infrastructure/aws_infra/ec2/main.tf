@@ -9,13 +9,25 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"]  # Canonical owner ID for Ubuntu AMIs
 }
 
+data "aws_iam_instance_profile" "lab_instance_profile" {
+  name = "LabInstanceProfile"
+}
+
 resource "aws_key_pair" "ec2_key" {
   key_name = "ec2-key"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkyJS4CHgvAplYdW1vv3GJwotClk6Sujq1J/PPdXDTX felix@LAPTOP-VE0IUQ7K"
 }
 
-data "aws_iam_instance_profile" "lab_instance_profile" {
-  name = "LabInstanceProfile"
+resource "aws_eip" "eip_master" {
+  domain = "vpc"
+}
+
+data "template_file" "install_script_master" {
+  template = "${file("${path.module}/install_rancher_master.sh")}"
+  vars = {
+    allocation_id = aws_eip.eip_master.allocation_id
+    ip_address = aws_eip.eip_master.public_ip
+  }
 }
 
 # ASG with Launch template
@@ -23,7 +35,7 @@ resource "aws_launch_template" "rancher-master-templ" {
   name_prefix   = "rancher-master-templ"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.medium"
-  user_data     = filebase64("./${path.module}/install_rancher_master.sh")
+  user_data     = base64encode(data.template_file.install_script_master.rendered)
   key_name = aws_key_pair.ec2_key.key_name
   
   iam_instance_profile {
@@ -68,7 +80,7 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
 data "template_file" "install_script" {
   template = "${file("${path.module}/install_rancher_node.sh")}"
   vars = {
-    lb_dns_name = var.lb_dns_name
+    ip_address = aws_eip.eip_master.public_ip
   }
 }
 
@@ -76,11 +88,7 @@ resource "aws_launch_template" "rancher-node-templ" {
   name_prefix   = "rancher-node-templ"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.medium"
-  user_data     = templatefile(
-    data.template_file.install_script,
-    {
-      lb_dns_name = var.lb_dns_name
-    })
+  user_data     = base64encode(data.template_file.install_script.rendered)
   key_name = aws_key_pair.ec2_key.key_name
   
   iam_instance_profile {
