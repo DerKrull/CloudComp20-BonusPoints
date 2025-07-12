@@ -5,9 +5,10 @@ touch /etc/rancher/rke2/config.yaml
 
 cat <<EOF > /etc/rancher/rke2/config.yaml
 token: my-secret-token
-server: https://${ip_address}:9345
+server: https://${rke2_master_dns}:9345
 tls-san:
-    - ${ip_address}
+    - ${internal_dns}
+    - ${load_balancer_dns}
 EOF
 
 curl -sfL https://get.rke2.io | sh -

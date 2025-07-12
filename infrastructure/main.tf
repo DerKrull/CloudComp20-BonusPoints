@@ -1,5 +1,10 @@
+locals {
+  group_name = "cloudcomp${var.group_number}"
+}
+
 module "aws_infra" {
     source = "./aws_infra"
+    group_name = local.group_name
 }
 
 # module "openstack-rke2" {

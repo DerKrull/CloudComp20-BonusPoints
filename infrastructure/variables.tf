@@ -1,3 +1,7 @@
+variable "group_number" {
+  default = "20"
+  type = string
+}
 variable "openstack-project" {
     default = "CloudComp20"
 }

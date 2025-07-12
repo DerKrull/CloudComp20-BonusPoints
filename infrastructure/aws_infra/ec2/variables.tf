@@ -22,3 +22,11 @@ variable "lb_dns_name" {
     description = "Internal DNS name of the load balancer"
 }
 
+variable "hosted_zone_id" {
+    description = "Id of the private hosted zone"
+}
+
+variable "internal_dns" {
+    description = "Domain name of the private hosted zone"
+}
+

@@ -1,3 +1,7 @@
+locals {
+  record_name = "rke2-master.${var.internal_dns}"
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -18,15 +22,13 @@ resource "aws_key_pair" "ec2_key" {
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkyJS4CHgvAplYdW1vv3GJwotClk6Sujq1J/PPdXDTX felix@LAPTOP-VE0IUQ7K"
 }
 
-resource "aws_eip" "eip_master" {
-  domain = "vpc"
-}
-
 data "template_file" "install_script_master" {
   template = "${file("${path.module}/install_rancher_master.sh")}"
   vars = {
-    allocation_id = aws_eip.eip_master.allocation_id
-    ip_address = aws_eip.eip_master.public_ip
+    load_balancer_dns = var.lb_dns_name
+    internal_dns = var.internal_dns
+    record_name = local.record_name
+    hosted_zone_id = var.hosted_zone_id
   }
 }
 
@@ -80,7 +82,9 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
 data "template_file" "install_script" {
   template = "${file("${path.module}/install_rancher_node.sh")}"
   vars = {
-    ip_address = aws_eip.eip_master.public_ip
+    rke2_master_dns = local.record_name
+    load_balancer_dns = var.lb_dns_name
+    internal_dns = var.internal_dns
   }
 }
 
