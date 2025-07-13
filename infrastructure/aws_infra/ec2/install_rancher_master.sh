@@ -9,7 +9,7 @@ sudo ./aws/install
 # Update or create a Route53 record for the instance
 
 INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-INSTANCE_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+INSTANCE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 cat > change-batch.json <<EOF
 {

@@ -1,5 +1,7 @@
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/23" # 512 IPs 
+  cidr_block           = "10.0.0.0/23" # 512 IPs 
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 }
 
 # Creating 1st public subnet 
