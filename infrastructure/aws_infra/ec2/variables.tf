@@ -6,15 +6,15 @@ variable "sg_for_ec2_id" {
   description = "ID of the secruity group to use with EC2"
 }
 
-variable "rancher_tcp_443_tg_arn" {
+variable "rancher_https_tg_arn" {
     description = "ARN of the target group to attach to"
 }
 
-variable "rancher_tcp_80_tg_arn" {
+variable "rancher_control_https_tg_arn" {
     description = "ARN of the target group to attach to"
 }
 
-variable "rancher_master_tg_arn" {
+variable "rancher_http_tg_arn" {
     description = "ARN of the target group to attach to"
 }
 

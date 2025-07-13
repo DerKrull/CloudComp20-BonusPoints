@@ -22,22 +22,17 @@ resource "aws_key_pair" "ec2_key" {
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkyJS4CHgvAplYdW1vv3GJwotClk6Sujq1J/PPdXDTX felix@LAPTOP-VE0IUQ7K"
 }
 
-data "template_file" "install_script_master" {
-  template = "${file("${path.module}/install_rancher_master.sh")}"
-  vars = {
-    load_balancer_dns = var.lb_dns_name
-    internal_dns = var.internal_dns
-    record_name = local.record_name
-    hosted_zone_id = var.hosted_zone_id
-  }
-}
-
 # ASG with Launch template
 resource "aws_launch_template" "rancher-master-templ" {
   name_prefix   = "rancher-master-templ"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.medium"
-  user_data     = base64encode(data.template_file.install_script_master.rendered)
+  user_data     = base64encode(templatefile("${path.module}/install_rancher_master.sh", {
+    load_balancer_dns = var.lb_dns_name
+    internal_dns = var.internal_dns
+    record_name = local.record_name
+    hosted_zone_id = var.hosted_zone_id
+  }))
   key_name = aws_key_pair.ec2_key.key_name
   
   iam_instance_profile {
@@ -64,9 +59,9 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
 
   # Connect to the target group
   target_group_arns = [
-    var.rancher_tcp_443_tg_arn, 
-    var.rancher_tcp_80_tg_arn, 
-    var.rancher_master_tg_arn#
+    var.rancher_https_tg_arn,
+    var.rancher_http_tg_arn,
+    var.rancher_control_https_tg_arn
   ]
 
   vpc_zone_identifier = [ # Creating EC2 instances in private subnet
@@ -79,20 +74,15 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
   }
 }
 
-data "template_file" "install_script" {
-  template = "${file("${path.module}/install_rancher_node.sh")}"
-  vars = {
-    rke2_master_dns = local.record_name
-    load_balancer_dns = var.lb_dns_name
-    internal_dns = var.internal_dns
-  }
-}
-
 resource "aws_launch_template" "rancher-node-templ" {
   name_prefix   = "rancher-node-templ"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.medium"
-  user_data     = base64encode(data.template_file.install_script.rendered)
+  user_data     = base64encode(templatefile("${path.module}/install_rancher_node.sh", {
+    rke2_master_dns = local.record_name
+    load_balancer_dns = var.lb_dns_name
+    internal_dns = var.internal_dns
+  }))
   key_name = aws_key_pair.ec2_key.key_name
   
   iam_instance_profile {
@@ -118,7 +108,10 @@ resource "aws_autoscaling_group" "rancher_node_asg" {
   min_size         = 2
 
   # Connect to the target group
-  target_group_arns = [var.rancher_tcp_443_tg_arn, var.rancher_tcp_80_tg_arn]
+  target_group_arns = [
+    var.rancher_https_tg_arn,
+    var.rancher_http_tg_arn,
+    var.rancher_control_https_tg_arn]
 
   vpc_zone_identifier = [ # Creating EC2 instances in private subnet
     var.subnet_id

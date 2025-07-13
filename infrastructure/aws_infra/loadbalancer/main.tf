@@ -1,37 +1,37 @@
-resource "aws_lb" "lb" {
+resource "aws_lb" "rancher_alb" {
   name               = "external-lb"
   internal           = false
-  load_balancer_type = "network"
+  load_balancer_type = "application"
   security_groups    = [var.sg_for_lb_id]
   subnets            = var.public_subnet_ids
   depends_on         = [var.igw] 
 }
 
-resource "aws_lb_target_group" "rancher_tcp_443_tg" {
-  name     = "rancher-tcp-443"
-  port     = 443
-  protocol = "TCP"
+resource "aws_lb_target_group" "rancher_control_plane_https_tg" {
+  name        = "rancher-control-plane-https-tg"
+  port     = 6443
+  protocol = "HTTPS"
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "TCP"
-    port = "80"
-    healthy_threshold = 3
-    unhealthy_threshold = 3
-    timeout = 6
-    interval = 10
+    protocol = "HTTPS"
+    port     = "6443"
+    healthy_threshold = 10
+    unhealthy_threshold = 10
+    timeout = 120
+    interval = 300
   }
 }
 
-resource "aws_lb_target_group" "rancher_tcp_80_tg" {
-  name     = "rancher-tcp-80"
-  port     = 80
-  protocol = "TCP"
+resource "aws_lb_target_group" "rancher_https_tg" {
+  name        = "rancher-https-tg"
+  port     = 30443
+  protocol = "HTTPS"
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "TCP"
-    port = "traffic-port"
+    protocol = "HTTPS"
+    port     = "30443"
     healthy_threshold = 3
     unhealthy_threshold = 3
     timeout = 6
@@ -39,15 +39,15 @@ resource "aws_lb_target_group" "rancher_tcp_80_tg" {
   }
 }
 
-resource "aws_lb_target_group" "rancher_master_tg" {
-  name = "rancher-master-tg"
-  port = 9345
-  protocol = "TCP"
-  vpc_id = var.vpc_id
+resource "aws_lb_target_group" "rancher_http_tg" {
+  name     = "rancher-http-tg"
+  port     = 30080
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "TCP"
-    port = "80"
+    protocol = "HTTP"
+    port     = "30080"
     healthy_threshold = 3
     unhealthy_threshold = 3
     timeout = 6
@@ -55,34 +55,68 @@ resource "aws_lb_target_group" "rancher_master_tg" {
   }
 }
 
-resource "aws_lb_listener" "listener_443" {
-  load_balancer_arn = aws_lb.lb.arn
-  port              = "443"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.rancher_tcp_443_tg.arn
-  }
-}
-
-resource "aws_lb_listener" "listener_80" {
-  load_balancer_arn = aws_lb.lb.arn
-  port              = "80"
-  protocol          = "TCP"
+resource "aws_lb_listener" "control_plane_https" {
+  load_balancer_arn = aws_lb.rancher_alb.arn
+  port              = 6443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.rancher_self_signed.arn
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.rancher_tcp_80_tg.arn
+    target_group_arn = aws_lb_target_group.rancher_control_plane_https_tg.arn
   }
 }
 
-resource "aws_lb_listener" "listener_master" {
-  load_balancer_arn = aws_lb.lb.arn
-  port = "9345"
-  protocol = "TCP"
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.rancher_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.rancher_self_signed.arn
 
   default_action {
-    type = "forward"
-    target_group_arn = aws_lb_target_group.rancher_master_tg.arn
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.rancher_https_tg.arn
   }
+}
+
+
+resource "aws_lb_listener" "http_redirect" {
+  load_balancer_arn = aws_lb.rancher_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.rancher_http_tg.arn
+  }
+}
+
+resource "tls_private_key" "rancher" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_self_signed_cert" "rancher" {
+  private_key_pem = tls_private_key.rancher.private_key_pem
+  subject {
+    common_name  = "rancher"
+    organization = "cloudcomp20"
+  }
+
+  validity_period_hours = 8760
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+
+  dns_names = [aws_lb.rancher_alb.dns_name]
+}
+
+resource "aws_acm_certificate" "rancher_self_signed" {
+  private_key       = tls_private_key.rancher.private_key_pem
+  certificate_body  = tls_self_signed_cert.rancher.cert_pem
+  certificate_chain = tls_self_signed_cert.rancher.cert_pem
 }

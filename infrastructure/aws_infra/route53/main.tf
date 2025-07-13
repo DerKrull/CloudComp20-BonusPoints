@@ -12,17 +12,14 @@ resource "aws_route53_zone" "private" {
     
 }
 
-# A-Record für den Rancher Master Server
 resource "aws_route53_record" "rancher_master" {
   zone_id = aws_route53_zone.private.zone_id
   name    = "rke2-master.${local.domain_name}"
   type    = "A"
   ttl     = 300
 
-  # Platzhalter-IP, wird durch EC2 User Data Script aktualisiert
   records = ["127.0.0.1"]
 
-  # Erlaubt Überschreibung durch User Data Script
   lifecycle {
     ignore_changes = [records]
   }

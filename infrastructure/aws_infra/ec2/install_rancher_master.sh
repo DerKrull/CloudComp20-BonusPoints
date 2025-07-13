@@ -64,6 +64,7 @@ export PATH=$PATH:/var/lib/rancher/rke2/bin
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 export PATH=$PATH:/usr/local/bin
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
 
 # Install Rancher
 helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
@@ -83,10 +84,10 @@ helm repo update
 helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
-  --set crds.enabled=true
+  --set crds.enabled=false \
 
 # Install Rancher
-helm install rancher rancher-<CHART_REPO>/rancher \
+helm install rancher rancher-latest/rancher \
   --namespace cattle-system \
   --set hostname=${load_balancer_dns} \
   --set bootstrapPassword=admin
