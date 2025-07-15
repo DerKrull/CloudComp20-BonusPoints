@@ -46,22 +46,7 @@ module "ec2" {
     internal_dns = module.route53.internal_dns
 }
 
-resource "local_file" "kubeconfig" {
-  filename = "rke2.yaml"
-  content = ""
-}
-
-resource "null_resource" "download_kubeconfig" {
-  provisioner "local-exec" {
-    command = <<EOT
-      aws s3 cp s3://cloudcomp20-terraform-state-bucket/rke2.yaml rke2.yaml
-      sed -i 's/127.0.0.1/${module.loadbalancer.lb_internal_dns}/g' rke2.yaml
-    EOT
-    interpreter = ["/bin/bash", "-c"]
-  }
-
-  triggers = {
-    always_run = "${timestamp()}"
-    load_balancer_dns  = module.loadbalancer.lb_internal_dns
-  }
+resource "local_file" "lb_dns_name" {
+  content = module.loadbalancer.lb_internal_dns
+  filename = "${path.module}/lb_dns_name.out"
 }

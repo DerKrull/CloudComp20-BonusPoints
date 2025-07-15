@@ -35,61 +35,68 @@ EOF
 aws route53 change-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --change-batch file://change-batch.json
 rm change-batch.json
 
+# Mount ebs volume
+# ---
+# Create file system
+mkfs -t xfs /dev/xvdf
+# Create the directory to mount to
+mkdir -p /var/lib/rancher/
+# Mount the ebs volume
+mount /dev/xvdf /var/lib/rancher/
+
+cp /etc/fstab /etc/fstab.orig
+DEVICE_UUID=$(blkid -s UUID -o value /dev/xvdf)
+
+# Add entry to fstab if it doesn't already exist
+if ! grep -q "$DEVICE_UUID" /etc/fstab; then
+  echo "UUID=$DEVICE_UUID  /data  xfs  defaults,nofail  0  2" >> /etc/fstab
+fi
+
+# Mount all filesystems in fstab
+mount -a
+
+# Install Docker
 curl https://releases.rancher.com/install-docker/28.1.1.sh | sh
+
+sudo snap install yq
 
 sudo usermod -aG docker ubuntu
 
+# Install RKE2
+# ---
 mkdir -p /etc/rancher/rke2/
 
 cat <<EOF > /etc/rancher/rke2/config.yaml
 token: my-secret-token
 tls-san:
+    - ${record_name}
     - ${load_balancer_dns}
     - ${internal_dns}
+    - $INSTANCE_IP
+EOF
+
+mkdir -p /var/lib/rancher/rke2/server/manifests/
+
+# Write cert-manager manifest
+cat <<EOF > /var/lib/rancher/rke2/server/manifests/cert-manager.yaml
+${cert_manager}
+EOF
+
+# Write Rancher manifest
+cat <<EOF > /var/lib/rancher/rke2/server/manifests/rancher.yaml
+${rancher}
 EOF
 
 curl -sfL https://get.rke2.io | sh -
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
 
+# Wait until the kubeconfig exists
+while [ ! -f /etc/rancher/rke2/rke2.yaml ]; do sleep 2; done
+
+# Upload the fixed kubeconfig
 aws s3 cp /etc/rancher/rke2/rke2.yaml s3://cloudcomp20-terraform-state-bucket/rke2.yaml
-
-# Wait for kubeconfig file
-while [ ! -f /etc/rancher/rke2/rke2.yaml ]; do
-    sleep 2
-done
-
-export PATH=$PATH:/var/lib/rancher/rke2/bin
 
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 export PATH=$PATH:/usr/local/bin
-export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
-
-# Install Rancher
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-
-kubectl  --kubeconfig /etc/rancher/rke2/rke2.yaml create namespace cattle-system
-
-# If you have installed the CRDs manually, instead of setting `installCRDs` or `crds.enabled` to `true` in your Helm install command, you should upgrade your CRD resources before upgrading the Helm chart:
-kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
-
-# Add the Jetstack Helm repository
-helm repo add jetstack https://charts.jetstack.io
-
-# Update your local Helm chart repository cache
-helm repo update
-
-# Install the cert-manager Helm chart
-helm install cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --create-namespace \
-  --set crds.enabled=false \
-
-# Install Rancher
-helm install rancher rancher-latest/rancher \
-  --namespace cattle-system \
-  --set hostname=${load_balancer_dns} \
-  --set bootstrapPassword=admin
-
-kubectl -n cattle-system rollout status deploy/rancher

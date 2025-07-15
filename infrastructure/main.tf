@@ -19,27 +19,17 @@ provider "aws" {
   region = "us-east-1"
 }
 
-provider "helm" {
-  kubernetes = {
-    config_path = "${module.aws_infra.kubeconfig_path}"
-  }
-}
-
 module "aws_infra" {
-    source = "./aws_infra"
-    providers = {
-      aws = aws
-    }
-    group_name = local.group_name
+  source = "./aws_infra"
+  providers = {
+    aws = aws
+  }
+  group_name = local.group_name
 }
 
-# module "helm_charts" {
-#     depends_on = [ module.aws_infra ]
-#     providers = {
-#       helm = helm
-#     }
-#     source = "./helm_charts"
-#     load_balancer_dns = module.aws_infra.load_balancer_dns
+# module "rke2" {
+#   source  = "rancher/rke2/aws//examples/ha"
+#   version = "1.2.6"
 # }
 
 # module "openstack-rke2" {

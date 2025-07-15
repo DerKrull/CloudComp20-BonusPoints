@@ -1,3 +1,17 @@
+provider "helm" {
+  kubernetes = {
+    config_path = "${path.module}/../infrastructure/rke2.yaml"
+  }
+}
+
+terraform {
+  backend "s3" {
+    bucket = "cloudcomp20-terraform-state-bucket"
+    region = "us-east-1"
+    key = "helm/cloudcomp20.tfstate"
+  }
+}
+
 terraform {
   required_providers {
     helm = {
@@ -34,6 +48,10 @@ resource "helm_release" "rancher" {
     {
         name  = "bootstrapPassword"
         value = "admin"
+    },
+    {
+      name = "ingress.ingressClassName=nginx"
+      value = "nginx"
     }
   ]
 }
