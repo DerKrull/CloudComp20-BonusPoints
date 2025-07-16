@@ -27,14 +27,12 @@ module "aws_infra" {
   group_name = local.group_name
 }
 
-# module "rke2" {
-#   source  = "rancher/rke2/aws//examples/ha"
-#   version = "1.2.6"
-# }
 
-# module "openstack-rke2" {
-#     source = "./terraform-openstack-rke2/examples/hs-fulda/"
-#     project = var.openstack-project
-#     password = var.openstack-password
-#     username = var.openstack-username
-# }
+module "openstack-rke2" {
+  source   = "./terraform-openstack-rke2/examples/hs-fulda/"
+  project  = var.openstack-project
+  password = var.openstack-password
+  username = var.openstack-username
+}
+
+#token eyJhIjoiY2Y5MGVjNGE3ZDM4NDExMGU2ODFlN2EyMmU1MDI1YWYiLCJ0IjoiZDQwZTRiM2YtYzM3MS00MzFiLWJhZWMtM2MzNzZlNTlhZTFjIiwicyI6Ik5HRTFaRGd5T1RRdE9UWm1OaTAwT0dFeExUa3haRE10TkdVM01HWTBaR1ZpWVRaaCJ9
