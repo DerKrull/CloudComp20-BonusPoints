@@ -10,7 +10,7 @@ data "aws_ami" "ubuntu" {
     values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
-  owners = ["099720109477"]  # Canonical owner ID for Ubuntu AMIs
+  owners = ["099720109477"] # Canonical owner ID for Ubuntu AMIs
 }
 
 data "aws_iam_instance_profile" "lab_instance_profile" {
@@ -18,7 +18,7 @@ data "aws_iam_instance_profile" "lab_instance_profile" {
 }
 
 resource "aws_key_pair" "ec2_key" {
-  key_name = "ec2-key"
+  key_name   = "ec2-key"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkyJS4CHgvAplYdW1vv3GJwotClk6Sujq1J/PPdXDTX felix@LAPTOP-VE0IUQ7K"
 }
 
@@ -26,18 +26,18 @@ resource "aws_key_pair" "ec2_key" {
 resource "aws_launch_template" "rancher-master-templ" {
   name_prefix   = "rancher-master-templ"
   image_id      = data.aws_ami.ubuntu.id
-  instance_type = "t2.medium"
-  user_data     = base64encode(templatefile("${path.module}/install_rancher_master.sh", {
+  instance_type = "t2.xlarge"
+  user_data = base64encode(templatefile("${path.module}/install_rancher_master.sh", {
     load_balancer_dns = var.lb_dns_name
-    internal_dns = var.internal_dns
-    record_name = local.record_name
-    hosted_zone_id = var.hosted_zone_id
-    cert_manager = templatefile("${path.module}/manifests/cert-manager.yaml.tpl", {})
+    internal_dns      = var.internal_dns
+    record_name       = local.record_name
+    hosted_zone_id    = var.hosted_zone_id
+    cert_manager      = templatefile("${path.module}/manifests/cert-manager.yaml.tpl", {})
     rancher = templatefile("${path.module}/manifests/rancher.yaml.tpl", {
       load_balancer_dns = var.lb_dns_name
     })
   }))
-  key_name = aws_key_pair.ec2_key.key_name
+  key_name      = aws_key_pair.ec2_key.key_name
   ebs_optimized = true
 
   iam_instance_profile {
@@ -97,13 +97,13 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
 resource "aws_launch_template" "rancher-node-templ" {
   name_prefix   = "rancher-node-templ"
   image_id      = data.aws_ami.ubuntu.id
-  instance_type = "t2.medium"
-  user_data     = base64encode(templatefile("${path.module}/install_rancher_node.sh", {
-    rke2_master_dns = local.record_name
+  instance_type = "t2.large"
+  user_data = base64encode(templatefile("${path.module}/install_rancher_node.sh", {
+    rke2_master_dns   = local.record_name
     load_balancer_dns = var.lb_dns_name
-    internal_dns = var.internal_dns
+    internal_dns      = var.internal_dns
   }))
-  key_name = aws_key_pair.ec2_key.key_name
+  key_name      = aws_key_pair.ec2_key.key_name
   ebs_optimized = true
 
   iam_instance_profile {
@@ -131,13 +131,13 @@ resource "aws_launch_template" "rancher-node-templ" {
 
 resource "aws_autoscaling_group" "rancher_node_asg" {
   desired_capacity = 2
-  max_size         = 2
+  max_size         = 8
   min_size         = 2
 
   # Connect to the target group
   target_group_arns = [
     var.rancher_https_tg_arn,
-    var.rancher_http_tg_arn]
+  var.rancher_http_tg_arn]
 
   vpc_zone_identifier = [ # Creating EC2 instances in private subnet
     var.subnet_id
