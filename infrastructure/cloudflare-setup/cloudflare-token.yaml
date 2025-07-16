@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  token: ZXlKaElqb2lZMlk1TUdWak5HRTNaRE00TkRFeE1HVTJPREZsTjJFeU1tVTFNREkxWVdZaUxDSjBJam9pWkRRd1pUUmlNMll0WXpNM01TMDBNekZpTFdKaFpXTXRNMk16TnpabE5UbGhaVEZqSWl3aWN5STZJazVIUlRGYVJHZDVUMVJSZEU5VVdtMU9hVEF3VDBkRmVFeFVhM2hhUkUxMFRrZFZNMDFIV1RCYVIxWnBXVlJhYUNKOQo=
+kind: Secret
+metadata:
+  name: tunnel-token
+  namespace: default
+type: Opaque
