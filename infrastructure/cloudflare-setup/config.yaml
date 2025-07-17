@@ -1,0 +1,10 @@
+# config.yaml
+tunnel: 583b54e6-a3eb-4ac0-94be-4cb163ad39af
+credentials-file: /etc/cloudflared/583b54e6-a3eb-4ac0-94be-4cb163ad39af.json
+
+ingress:
+  - hostname: openstack.db-elite.cc
+    service: https://10.43.0.1:443
+    originRequest:
+      noTLSVerify: true # If your API server uses self-signed certs
+  - service: http_status:404

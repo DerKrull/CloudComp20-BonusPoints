@@ -34,5 +34,3 @@ module "openstack-rke2" {
   password = var.openstack-password
   username = var.openstack-username
 }
-
-#token eyJhIjoiY2Y5MGVjNGE3ZDM4NDExMGU2ODFlN2EyMmU1MDI1YWYiLCJ0IjoiZDQwZTRiM2YtYzM3MS00MzFiLWJhZWMtM2MzNzZlNTlhZTFjIiwicyI6Ik5HRTFaRGd5T1RRdE9UWm1OaTAwT0dFeExUa3haRE10TkdVM01HWTBaR1ZpWVRaaCJ9

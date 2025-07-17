@@ -35,26 +35,6 @@ EOF
 aws route53 change-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --change-batch file://change-batch.json
 rm change-batch.json
 
-# Mount ebs volume
-# ---
-# Create file system
-mkfs -t xfs /dev/xvdf
-# Create the directory to mount to
-mkdir -p /var/lib/rancher/
-# Mount the ebs volume
-mount /dev/xvdf /var/lib/rancher/
-
-cp /etc/fstab /etc/fstab.orig
-DEVICE_UUID=$(blkid -s UUID -o value /dev/xvdf)
-
-# Add entry to fstab if it doesn't already exist
-if ! grep -q "$DEVICE_UUID" /etc/fstab; then
-  echo "UUID=$DEVICE_UUID  /data  xfs  defaults,nofail  0  2" >> /etc/fstab
-fi
-
-# Mount all filesystems in fstab
-mount -a
-
 # Install Docker
 curl https://releases.rancher.com/install-docker/28.1.1.sh | sh
 

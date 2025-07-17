@@ -23,10 +23,10 @@ resource "aws_key_pair" "ec2_key" {
 }
 
 # ASG with Launch template
-resource "aws_launch_template" "rancher-master-templ" {
-  name_prefix   = "rancher-master-templ"
+resource "aws_launch_template" "rancher-instance-templ" {
+  name_prefix   = "rancher-instance-templ"
   image_id      = data.aws_ami.ubuntu.id
-  instance_type = "t2.xlarge"
+  instance_type = "t2.large"
   user_data = base64encode(templatefile("${path.module}/install_rancher_master.sh", {
     load_balancer_dns = var.lb_dns_name
     internal_dns      = var.internal_dns
@@ -38,7 +38,7 @@ resource "aws_launch_template" "rancher-master-templ" {
     })
   }))
   key_name      = aws_key_pair.ec2_key.key_name
-  ebs_optimized = true
+
 
   iam_instance_profile {
     arn = data.aws_iam_instance_profile.lab_instance_profile.arn
@@ -49,7 +49,7 @@ resource "aws_launch_template" "rancher-master-templ" {
     security_groups             = [var.sg_for_ec2_id]
   }
   block_device_mappings {
-    device_name = "/dev/sdf"
+    device_name = "/dev/sda1"
 
     ebs {
       volume_size = 20
@@ -81,7 +81,7 @@ resource "aws_autoscaling_group" "rancher_master_asg" {
   ]
 
   launch_template {
-    id      = aws_launch_template.rancher-master-templ.id
+    id      = aws_launch_template.rancher-instance-templ.id
     version = "$Latest"
   }
 
@@ -110,7 +110,7 @@ resource "aws_launch_template" "rancher-node-templ" {
     arn = data.aws_iam_instance_profile.lab_instance_profile.arn
   }
   block_device_mappings {
-    device_name = "/dev/sdf"
+    device_name = "/dev/sda1"
 
     ebs {
       volume_size = 20
