@@ -1,9 +1,26 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+provider "registry.opentofu.org/cloudflare/cloudflare" {
+  version     = "5.7.1"
+  constraints = ">= 5.3.0"
+  hashes = [
+    "h1:24uCJp1H3ZK8CCwszYyR3qtOn5Z5Hn1eCcv2gkH7+4g=",
+    "zh:0bbd2eaa8210b2214dc426a2471b38cee53db9750b4916b34b0926fc9cbe4d7b",
+    "zh:0de3675e2ace7478ab0d354b2b6db4be2ae5a9a5e68b725cdd10e956131ec687",
+    "zh:4787a255919911aac5e1f8d47ed19fa45e5b90439ecf1fffbb17ff8bfb28de79",
+    "zh:4eb1e4300b3cdee3a323457ebcc8df29a735ea6bbabe3cf9cbd3dc3fb5a9172b",
+    "zh:580bbd5a727c9e3f31ae47c872df860c9a08ea998e0ff3dfe37dbac536146166",
+    "zh:6a359212678ffcf88551e2d8d0f8e52418031cf1f8077bb8ddf500171ee90f2b",
+    "zh:bec6890cb11511577c5f8ec8954e26ac51c44a114cb3e0349fea40f87930c029",
+    "zh:dbe3585510283c8e53a2b24cc7a69fab0ee9d71addae0db1be0374bc32fc6355",
+    "zh:f809ab383cca0a5f83072981c64208cbd7fa67e986a86ee02dd2c82333221e32",
+  ]
+}
+
 provider "registry.opentofu.org/hashicorp/aws" {
   version     = "6.3.0"
-  constraints = "~> 6.0"
+  constraints = ">= 6.0.0, ~> 6.0"
   hashes = [
     "h1:rwx5AqNtK7TrHoQEYrN0To7IwdoHUilWffkEOBnC7yc=",
     "zh:0a12dbb21a871648be6fee885389e7ecc929ee8fae03a3f04e984dc6d5b7ee99",
@@ -37,8 +54,7 @@ provider "registry.opentofu.org/hashicorp/local" {
 }
 
 provider "registry.opentofu.org/hashicorp/null" {
-  version     = "3.2.4"
-  constraints = "~> 3.2.2"
+  version = "3.2.4"
   hashes = [
     "h1:jsKjBiLb+v3OIC3xuDiY4sR0r1OHUMSWPYKult9MhT0=",
     "zh:1769783386610bed8bb1e861a119fe25058be41895e3996d9216dd6bb8a7aee3",
@@ -54,27 +70,9 @@ provider "registry.opentofu.org/hashicorp/null" {
   ]
 }
 
-provider "registry.opentofu.org/hashicorp/random" {
-  version     = "3.6.3"
-  constraints = "~> 3.6.0"
-  hashes = [
-    "h1:Ry0Lr0zaoicslZlcUR4rAySPpl/a7QupfMfuAxhW3fw=",
-    "zh:1bfd2e54b4eee8c761a40b6d99d45880b3a71abc18a9a7a5319204da9c8363b2",
-    "zh:21a15ac74adb8ba499aab989a4248321b51946e5431219b56fc827e565776714",
-    "zh:221acfac3f7a5bcd6cb49f79a1fca99da7679bde01017334bad1f951a12d85ba",
-    "zh:3026fcdc0c1258e32ab519df878579160b1050b141d6f7883b39438244e08954",
-    "zh:50d07a7066ea46873b289548000229556908c3be746059969ab0d694e053ee4c",
-    "zh:54280cdac041f2c2986a585f62e102bc59ef412cad5f4ebf7387c2b3a357f6c0",
-    "zh:632adf40f1f63b0c5707182853c10ae23124c00869ffff05f310aef2ed26fcf3",
-    "zh:b8c2876cce9a38501d14880a47e59a5182ee98732ad7e576e9a9ce686a46d8f5",
-    "zh:f27e6995e1e9fe3914a2654791fc8d67cdce44f17bf06e614ead7dfd2b13d3ae",
-    "zh:f423f2b7e5c814799ad7580b5c8ae23359d8d342264902f821c357ff2b3c6d3d",
-  ]
-}
-
 provider "registry.opentofu.org/terraform-provider-openstack/openstack" {
   version     = "2.1.0"
-  constraints = ">= 2.0.0, ~> 2.1.0"
+  constraints = ">= 2.0.0"
   hashes = [
     "h1:2TcmfEzBOGQPALErrXTaL6v+k/WAL40adao4izRYmdw=",
     "zh:113661750398bf21c8fe36aade9fb6f5eb82b5bcd3bcd30bd37ac805d83398f4",

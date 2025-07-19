@@ -3,43 +3,43 @@ resource "aws_lb" "rancher_alb" {
   internal           = false
   load_balancer_type = "network"
   security_groups    = [var.sg_for_lb_id]
-  subnets            = var.public_subnet_ids
+  subnets            = var.subnet_ids
   depends_on         = [var.igw]
 }
 
 resource "aws_lb_target_group" "rancher_control_plane_https_tg" {
-  name        = "rancher-control-plane-https-tg"
+  name     = "rancher-control-plane-https-tg"
   port     = 6443
   protocol = "TCP"
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "HTTP"
-    port     = "80"
-    path = "/healthz"
-    healthy_threshold = 3
+    protocol            = "HTTP"
+    port                = "80"
+    path                = "/healthz"
+    healthy_threshold   = 3
     unhealthy_threshold = 3
-    timeout = 6
-    interval = 10
-    matcher = "200-499"
+    timeout             = 6
+    interval            = 10
+    matcher             = "200-499"
   }
 }
 
 resource "aws_lb_target_group" "rancher_https_tg" {
-  name        = "rancher-https-tg"
+  name     = "rancher-https-tg"
   port     = 443
   protocol = "TCP"
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "HTTP"
-    path = "/healthz"
-    port     = "80"
-    matcher = "200-499"
-    healthy_threshold = 3
+    protocol            = "HTTP"
+    path                = "/healthz"
+    port                = "80"
+    matcher             = "200-499"
+    healthy_threshold   = 3
     unhealthy_threshold = 3
-    timeout = 6
-    interval = 10
+    timeout             = 6
+    interval            = 10
   }
 }
 
@@ -50,14 +50,14 @@ resource "aws_lb_target_group" "rancher_http_tg" {
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol = "HTTP"
-    port     = "traffic-port"
-    path = "/healthz"
-    matcher = "200-499"
-    healthy_threshold = 3
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    path                = "/healthz"
+    matcher             = "200-499"
+    healthy_threshold   = 3
     unhealthy_threshold = 3
-    timeout = 6
-    interval = 10
+    timeout             = 6
+    interval            = 10
   }
 }
 

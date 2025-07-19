@@ -7,9 +7,9 @@ unzip awscliv2.zip
 sudo ./aws/install
 
 # Update or create a Route53 record for the instance
-
-INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-INSTANCE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+INSTANCE_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 cat > change-batch.json <<EOF
 {
